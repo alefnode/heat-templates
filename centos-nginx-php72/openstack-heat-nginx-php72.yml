@@ -79,7 +79,7 @@ resources:
             echo \"Configuring domain name and nginx server\" \n
             mkdir -p /var/www/$DOMAIN \n
 
-            sudo curl -o /var/www/$DOMAIN.conf https://github.com/alefnode/heat-templates/blob/master/centos-nginx-php72/nginx-template-php.conf \n
+            sudo curl -o /var/www/$DOMAIN.conf https://raw.githubusercontent.com/alefnode/heat-templates/master/centos-nginx-php72/nginx-template-php.conf \n
             sudo sed -i \"s/domain_name/$DOMAIN/g\" /etc/nginx/conf.d/$DOMAIN.conf \n
             sudo systemctl restart nginx \n
 
