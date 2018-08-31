@@ -1,0 +1,9 @@
+parameters:
+  instance_name: < enter instance name >
+  key_name: < enter login key name >
+  flavor: < enter flavor name >
+  image_name: < enter image name >
+  public_net: < enter public network name or id >
+  internal_net: < enter internal network name or id >
+  internal_subnet: < enter internal subnet name or id >
+
