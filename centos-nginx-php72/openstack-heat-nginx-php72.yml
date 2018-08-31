@@ -64,9 +64,8 @@ resources:
           template: "#!/bin/sh -v \n
             echo \"Installing dependencies and software\" \n
             sudo yum update -y \n
-            sudo yum install epel-release -y \n
+            sudo yum install epel-release yum-utils wget rsync -y \n
             sudo yum install http://rpms.remirepo.net/enterprise/remi-release-7.rpm -y \n
-            sudo yum install yum-utils wget rsync -y \n
             sudo yum-config-manager --enable remi-php72 \n
             sudo yum update -y \n
             sudo yum install php72 php72-php-fpm php72-php-gd php72-php-json php72-php-mbstring php72-php-mysqlnd php72-php-xml php72-php-xmlrpc php72-php-opcache nginx -y \n
@@ -79,7 +78,7 @@ resources:
             echo \"Configuring domain name and nginx server\" \n
             mkdir -p /var/www/$DOMAIN \n
 
-            sudo curl -o /var/www/$DOMAIN.conf https://raw.githubusercontent.com/alefnode/heat-templates/master/centos-nginx-php72/nginx-template-php.conf \n
+            sudo curl -o /etc/nginx/conf.d/$DOMAIN.conf https://raw.githubusercontent.com/alefnode/heat-templates/master/centos-nginx-php72/nginx-template-php.conf \n
             sudo sed -i \"s/domain_name/$DOMAIN/g\" /etc/nginx/conf.d/$DOMAIN.conf \n
             sudo systemctl restart nginx \n
 
