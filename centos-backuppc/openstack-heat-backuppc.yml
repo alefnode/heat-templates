@@ -77,14 +77,15 @@ resources:
 
             echo "Edit BackupPC config files"
             sudo sed -i "s/{CgiAdminUserGroup} = ''/{CgiAdminUserGroup} = 'backuppc'/g" /etc/BackupPC/config.pl
+            sudo sed -i "s/{CgiAdminUsers} = ''/{CgiAdminUsers}     = 'backuppc'/g" /etc/BackupPC/config.pl
             sudo sed -i "s/{PingPath} = ''/{PingPath} = '\/bin\/ping'/g" /etc/BackupPC/config.pl
 
             sudo sed -i "s/Require local/Require all granted/g" /etc/httpd/conf.d/BackupPC.conf
 
             htpasswd -b -c /etc/BackupPC/apache.users backuppc $PASSWORD
 
-            systemctl restart backuppc.service
-            systemctl restart httpd.service
+            sudo systemctl restart backuppc.service
+            sudo systemctl restart httpd.service
 
             cd /var/lib/BackupPC/
             sudo -u backuppc ssh-keygen -f id_rsa -t rsa -N ''
