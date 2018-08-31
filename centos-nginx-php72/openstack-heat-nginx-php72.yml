@@ -1,7 +1,7 @@
 description: Heat template for Centos 7 with Nginx and PHP7.2.
 heat_template_version: '2018-03-02'
 outputs:
-  node_private_ip:
+  nginx-php72_private_ip:
     description: Private IP address of node
     value:
       get_attr:
@@ -55,7 +55,7 @@ resources:
         get_param: instance_name
       networks:
       - port:
-          get_resource: node_port
+          get_resource: nginx-php72_port
       user_data:
         str_replace:
           params:
@@ -89,9 +89,9 @@ resources:
             sudo setsebool httpd_can_network_connect 1 -P
             sudo setsebool -P httpd_can_network_connect_db 1
 
-            
+
     type: OS::Nova::Server
-  node_port:
+  nginx-php72_port:
     properties:
       fixed_ips:
       - subnet_id:
@@ -99,9 +99,9 @@ resources:
       network_id:
         get_param: internal_net
       security_groups:
-      - get_resource: node_security_group
+      - get_resource: nginx-php72_security_group
     type: OS::Neutron::Port
-  node_security_group:
+  nginx-php72_security_group:
     properties:
       rules:
       - port_range_max: 80
@@ -113,7 +113,7 @@ resources:
     properties:
       image:
         get_param: image_name
-      name: instance_vol1
+      name: nginx-php72_vol1
       size:
         get_param: instance_vol_size
     type: OS::Cinder::Volume
