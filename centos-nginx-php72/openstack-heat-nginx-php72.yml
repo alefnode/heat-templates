@@ -1,0 +1,121 @@
+description: Heat template for Centos 7 with Nginx and PHP7.2.
+heat_template_version: '2018-03-02'
+outputs:
+  node_private_ip:
+    description: Private IP address of node
+    value:
+      get_attr:
+      - node
+      - first_address
+parameters:
+  flavor:
+    default: Mini
+    description: Specify the flavor of the instance.
+    label: Flavor
+    type: string
+  image_name:
+    default: Centos 7
+    description: Name or ID of the image being used.
+    type: string
+  instance_name:
+    description: Name of the instance.
+    type: string
+  instance_vol_size:
+    default: 50
+    description: Boot volume size for the instance.
+    type: string
+  internal_net:
+    description: Internal network name or ID.
+    type: string
+  internal_subnet:
+    description: Internal subnet name or ID.
+    type: string
+  key_name:
+    description: Name of key-pair to be used for the ELK server.
+    label: key_name
+    type: string
+  domain_name:
+    description: Specify domain name for nginx server (Example; blog.alefnode.com)
+      to internet.
+    type: string
+resources:
+  node:
+    properties:
+      admin_user: centos
+      block_device_mapping:
+      - delete_on_termination: false
+        device_name: vda
+        volume_id:
+          get_resource: instance_volume
+      flavor:
+        get_param: flavor
+      key_name:
+        get_param: key_name
+      name:
+        get_param: instance_name
+      networks:
+      - port:
+          get_resource: node_port
+      user_data:
+        str_replace:
+          params:
+            $DOMAIN:
+              get_param: domain_name
+          template: "#!/bin/sh -v
+            echo \"Installing dependencies and software\"
+            sudo yum update -y
+            sudo yum install epel-release -y
+            sudo yum install http://rpms.remirepo.net/enterprise/remi-release-7.rpm -y
+            sudo yum install yum-utils wget rsync -y
+            sudo yum-config-manager --enable remi-php72
+            sudo yum update -y
+            sudo yum install php72 -y
+            sudo yum install php72-php-fpm php72-php-gd php72-php-json php72-php-mbstring php72-php-mysqlnd php72-php-xml php72-php-xmlrpc php72-php-opcache -y
+            sudo systemctl enable php72-php-fpm.service
+            sudo yum install nginx -y
+            sudo systemctl enable nginx
+            sudo sed -i \"s/user\ =\ apache/user\ =\ nginx/g\" /etc/opt/remi/php72/php-fpm.d/www.conf
+            sudo sed -i \"s/group\ =\ apache/group\ =\ nginx/g\" /etc/opt/remi/php72/php-fpm.d/www.conf
+            sudo systemctl restart php72-php-fpm.service
+
+            echo \"Configuring domain name and nginx server\"
+            mkdir -p /var/www/$DOMAIN
+
+            sudo curl -o /var/www/$DOMAIN https://github.com/alefnode/heat-templates/blob/master/centos-nginx-php72/nginx-template-php.conf
+            sudo sed -i \"s/domain_name/$DOMAIN/g\" /var/www/$DOMAIN
+            sudo systemctl restart nginx
+
+            sudo chown -R centos:centos /var/www/
+            echo \"Enabling on SELinux connections to webserver and to DB and also to files on folder\"
+            sudo chcon -R -t httpd_sys_content_t /var/www/$DOMAIN
+            sudo setsebool httpd_can_network_connect 1 -P
+            sudo setsebool -P httpd_can_network_connect_db 1
+
+            "
+    type: OS::Nova::Server
+  node_port:
+    properties:
+      fixed_ips:
+      - subnet_id:
+          get_param: internal_subnet
+      network_id:
+        get_param: internal_net
+      security_groups:
+      - get_resource: node_security_group
+    type: OS::Neutron::Port
+  node_security_group:
+    properties:
+      rules:
+      - port_range_max: 80
+        port_range_min: 80
+        protocol: tcp
+        remote_ip_prefix: 0.0.0.0/0
+    type: OS::Neutron::SecurityGroup
+  instance_volume:
+    properties:
+      image:
+        get_param: image_name
+      name: instance_vol1
+      size:
+        get_param: instance_vol_size
+    type: OS::Cinder::Volume
