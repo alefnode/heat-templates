@@ -92,7 +92,10 @@ resources:
               template: |
                 #!/bin/sh -v
 
-                echo "Installing HAProxe"
+                echo "Installing HAProxy"
+                yum install epel-release wget -y
+                yum update -y
+
 
 outputs:
   haproxy_private_ip:
