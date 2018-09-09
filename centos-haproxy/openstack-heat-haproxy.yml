@@ -103,17 +103,6 @@ resources:
                 # Generate a passphrase
                 PASSPHRASE=$(head -c 500 /dev/urandom | tr -dc a-z0-9A-Z | head -c 16; echo)
 
-                # Certificate details; replace items in angle brackets with your own info
-                subj="
-                C=ES
-                ST=MAD
-                O=Alefnode
-                localityName=MAD
-                commonName=$DOMAIN
-                organizationalUnitName=ALEPH-0
-                emailAddress=notuse@test.com
-                "
-
                 # Generate the server private key
                 openssl genrsa -des3 -out $DOMAIN.key -passout pass:$PASSPHRASE 2048
 
@@ -121,7 +110,6 @@ resources:
                 openssl req \
                     -new \
                     -batch \
-                    -subj "$(echo -n "$subj" | tr "\n" "/")" \
                     -key $DOMAIN.key \
                     -out $DOMAIN.csr \
                     -passin pass:$PASSPHRASE
@@ -132,6 +120,15 @@ resources:
 
                 # Generate the cert
                 openssl x509 -req -days 365 -in $DOMAIN.csr -signkey $DOMAIN.key -out $DOMAIN.crt
+                cp $DOMAIN.crt /tmp/
+                cp $DOMAIN.key /tmp/
+                rm -rf $DOMAIN*
+
+                sudo mkdir -p /etc/haproxy/certs/
+                sudo -E bash -c "cat /tmp/$DOMAIN.crt /tmp/$DOMAIN.key > /etc/haproxy/certs/$DOMAIN.pem"
+                sudo mv /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.orig
+                sudo curl -o /etc/haproxy/haproxy.cfg https://raw.githubusercontent.com/alefnode/heat-templates/master/centos-haproxy/haproxy-template.cfg
+
 
 
 outputs:
