@@ -96,6 +96,7 @@ resources:
                 sudo yum install epel-release wget -y
                 sudo yum update -y
                 sudo yum install haproxy
+                sudo systemctl enable haproxy
 
                 echo "Create certificate to first use for letsencrypt"
                 DOMAIN="test"
