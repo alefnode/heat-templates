@@ -72,15 +72,15 @@ resources:
             sudo yum install php72 php72-php-fpm php72-php-gd php72-php-json php72-php-mbstring php72-php-mysqlnd php72-php-xml php72-php-xmlrpc php72-php-opcache nginx -y
             sudo systemctl enable php72-php-fpm.service
             sudo systemctl enable nginx
-            sudo sed -i \"s/user\ =\ apache/user\ =\ nginx/g\" /etc/opt/remi/php72/php-fpm.d/www.conf
-            sudo sed -i \"s/group\ =\ apache/group\ =\ nginx/g\" /etc/opt/remi/php72/php-fpm.d/www.conf
+            sudo sed -i "s/user\ =\ apache/user\ =\ nginx/g" /etc/opt/remi/php72/php-fpm.d/www.conf
+            sudo sed -i "s/group\ =\ apache/group\ =\ nginx/g" /etc/opt/remi/php72/php-fpm.d/www.conf
             sudo systemctl restart php72-php-fpm.service
 
             echo "Configuring domain name and nginx server"
             mkdir -p /var/www/$DOMAIN
 
             sudo curl -o /etc/nginx/conf.d/$DOMAIN.conf https://raw.githubusercontent.com/alefnode/heat-templates/master/centos-nginx-php72/nginx-template-php.conf
-            sudo sed -i \"s/domain_name/$DOMAIN/g\" /etc/nginx/conf.d/$DOMAIN.conf
+            sudo sed -i "s/domain_name/$DOMAIN/g" /etc/nginx/conf.d/$DOMAIN.conf
             sudo systemctl restart nginx
 
             sudo chown -R centos:centos /var/www/
